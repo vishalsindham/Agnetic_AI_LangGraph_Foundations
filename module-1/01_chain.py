@@ -1,14 +1,13 @@
-from dotenv import load_dotenv
 from pprint import pprint
-from langchain_core.messages import AIMessage, HumanMessage
-from langchain_google_genai import ChatGoogleGenerativeAI
-from typing_extensions import TypedDict
-from langchain_core.messages import AnyMessage
-from langgraph.graph import MessagesState
 from typing import Annotated
-from langgraph.graph.message import add_messages
+
+from dotenv import load_dotenv
 from IPython.display import Image, display
-from langgraph.graph import StateGraph, START, END
+from langchain_core.messages import AIMessage, AnyMessage, HumanMessage
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langgraph.graph import END, START, MessagesState, StateGraph
+from langgraph.graph.message import add_messages
+from typing_extensions import TypedDict
 
 load_dotenv()
 
@@ -32,6 +31,7 @@ llm = ChatGoogleGenerativeAI(model="gemini-3.1-flash-lite")
 
 # We can pass a function schema to the LLM which the LLM use when required.
 
+
 def multiply(a: int, b: int) -> int:
     """Multiply a and b.
 
@@ -40,6 +40,7 @@ def multiply(a: int, b: int) -> int:
         b: second int
     """
     return a * b
+
 
 llm_with_tools = llm.bind_tools(multiply)
 
@@ -77,7 +78,8 @@ llm_with_tools = llm.bind_tools(multiply)
 
 # Node
 def tool_calling_llm(state: MessagesState):
-    return {"messages" : [llm_with_tools.invoke(state['messages'])]}
+    return {"messages": [llm_with_tools.invoke(state["messages"])]}
+
 
 # Build graph
 builder = StateGraph(MessagesState)
@@ -91,13 +93,13 @@ graph = builder.compile()
 # View
 # graph.get_graph().draw_mermaid_png(output_file_path="chain.png")
 
-msgs = graph.invoke({"messages" : HumanMessage(content="Hello")})
+msgs = graph.invoke({"messages": HumanMessage(content="Hello")})
 
-for msg in msgs['messages']:
+for msg in msgs["messages"]:
     msg.pretty_print()
 
 
-msgs = graph.invoke({"messages" : HumanMessage(content="Multiply 6 and 3")})
+msgs = graph.invoke({"messages": HumanMessage(content="Multiply 6 and 3")})
 
-for msg in msgs['messages']:
+for msg in msgs["messages"]:
     msg.pretty_print()
